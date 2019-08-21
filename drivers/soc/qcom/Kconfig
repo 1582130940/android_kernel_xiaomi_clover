@@ -929,6 +929,11 @@ config QCOM_CDSP_RM
 	  CPU L3 clock for improving IO-Coherent throughput and opt for QoS mode
 	  to improve RPC latency.
 
+config SERIAL_NUM
+	bool "Enable Serial Number Proc Interface"
+	help
+	  Provide a interface for reading CPU serial number
+
 config QCOM_CX_IPEAK
 	bool "Common driver to handle Cx iPeak limitation"
 	help
