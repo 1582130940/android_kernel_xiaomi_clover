@@ -2297,6 +2297,7 @@ static int _gpiod_direction_output_raw(struct gpio_desc *desc, int value)
 	int val = !!value;
 	int ret;
 
+#ifndef CONFIG_XIAOMI_CLOVER
 	/* GPIOs used for IRQs shall not be set as output */
 	if (test_bit(FLAG_USED_AS_IRQ, &desc->flags)) {
 		gpiod_err(desc,
@@ -2304,6 +2305,7 @@ static int _gpiod_direction_output_raw(struct gpio_desc *desc, int value)
 			  __func__);
 		return -EIO;
 	}
+#endif
 
 	if (test_bit(FLAG_OPEN_DRAIN, &desc->flags)) {
 		/* First see if we can enable open drain in hardware */
