@@ -1063,9 +1063,17 @@ EXPORT_SYMBOL(fb_set_var);
 
 int
 fb_blank(struct fb_info *info, int blank)
-{	
+{
 	struct fb_event event;
 	int ret = -EINVAL, early_ret;
+
+#ifdef CONFIG_XIAOMI_CLOVER
+	if (info->blank == blank) {
+		if (info->fbops->fb_blank)
+			ret = info->fbops->fb_blank(blank, info);
+		return ret;
+	}
+#endif
 
  	if (blank > FB_BLANK_POWERDOWN)
  		blank = FB_BLANK_POWERDOWN;
@@ -1088,6 +1096,11 @@ fb_blank(struct fb_info *info, int blank)
 		if (!early_ret)
 			fb_notifier_call_chain(FB_R_EARLY_EVENT_BLANK, &event);
 	}
+
+#ifdef CONFIG_XIAOMI_CLOVER
+	if (!ret)
+		info->blank = blank;
+#endif
 
  	return ret;
 }
@@ -1682,6 +1695,9 @@ static int do_register_framebuffer(struct fb_info *fb_info)
 		if (!registered_fb[i])
 			break;
 	fb_info->node = i;
+#ifdef CONFIG_XIAOMI_CLOVER
+	fb_info->blank = -1;
+#endif
 	atomic_set(&fb_info->count, 1);
 	mutex_init(&fb_info->lock);
 	mutex_init(&fb_info->mm_lock);
