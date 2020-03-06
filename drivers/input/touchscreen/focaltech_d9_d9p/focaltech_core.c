@@ -35,10 +35,6 @@
 #define FTS_SUSPEND_LEVEL 1
 #endif
 
-#ifdef CONFIG_HQ_HARDWARE_INFO
-#include <linux/hardware_info.h>
-#endif
-
 #if FTS_LOCK_DOWN_INFO_EN
 char tp_lockdown_info[30];
 #endif
@@ -70,11 +66,6 @@ struct fts_ts_data *fts_data;
 static void fts_release_all_finger(void);
 static int fts_ts_suspend(struct device *dev);
 static int fts_ts_resume(struct device *dev);
-
-#if defined(CONFIG_HQ_HARDWARE_INFO)
-char fts_tpdname[60] = {0};
-char fts_color[20] = {0};
-#endif
 
 /*
  * Name: fts_wait_tp_to_valid
@@ -1343,60 +1334,6 @@ int fts_LockDownInfo_get_from_boot(struct i2c_client *client, char *pProjectCode
 #endif
 	FTS_FUNC_EXIT();
 	return 0;
-}
-#endif
-
-#ifdef CONFIG_HQ_HARDWARE_INFO
-/*
- * Function:
- * Read fw version and config version .
- * Input:
- * client:  i2c device
- * Output:
- * 2: succeed, otherwise:failed
- */
-int fts_hq_hardinfo(struct fts_ts_data *ts_data, char *tpdname, int name_size, char *ctp_color, int color_size, char *lockdown_info)
-{
-	u8 fw_ver;
-	int ret = 0;
-	struct i2c_client *client = ts_data->client;
-	char ctp_vendor[10] = {0};
-	char lcd_vendor[10] = {0};
-	int i = 0;
-
-	FTS_INFO("read fw_ver from tp");
-	ret = fts_i2c_read_reg(client, FTS_REG_FW_VER, &fw_ver);
-	if (ret < 0) {
-		FTS_ERROR("read fw ver from tp fail");
-	}
-
-	FTS_INFO("read vendor id of tp and lcd");
-	if (!strncmp("31", lockdown_info, 2))
-		snprintf(ctp_vendor, sizeof(ctp_vendor), "biel");
-	else if (!strncmp("34", lockdown_info, 2))
-		snprintf(ctp_vendor, sizeof(ctp_vendor), "ofilm");
-	else
-		snprintf(ctp_vendor, sizeof(ctp_vendor), "invalid");
-
-	i += snprintf(tpdname, name_size, "[vendor]%s(TP)", ctp_vendor);
-
-	if (!strncmp("35", lockdown_info + 2, 2))
-		snprintf(lcd_vendor, sizeof(lcd_vendor), "boe");
-	else
-		snprintf(lcd_vendor, sizeof(lcd_vendor), "invalid");
-
-	i += snprintf(tpdname + i, name_size, "+%s(LCD),", lcd_vendor);
-
-	snprintf(tpdname + i, name_size, "[TP-IC]ft5526,[FW]Ver%02x", fw_ver);
-
-	if (!strncmp("31", lockdown_info + 4, 2))
-		snprintf(ctp_color, color_size, "0x31 white");
-	else if (!strncmp("32", lockdown_info + 4, 2))
-		snprintf(ctp_color, color_size, "0x32 black");
-	else
-		snprintf(ctp_color, color_size, "invalid");
-
-	return ret;
 }
 #endif
 
