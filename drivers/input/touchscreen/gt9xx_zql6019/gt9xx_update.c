@@ -2144,9 +2144,6 @@ s32 gtp_send_chr_cfg(struct i2c_client *client)
 
 extern bool check_charge1(void)
 {
-	if (tp_flag >= 1)
-		return 1;
-	else
 		return 0;
 }
 bool gtp_get_charger_status1(void)
