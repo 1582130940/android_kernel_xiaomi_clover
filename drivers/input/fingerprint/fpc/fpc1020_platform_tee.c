@@ -42,12 +42,6 @@
 #include <linux/fb.h>
 #include <linux/mdss_io_util.h>
 
-#ifdef CONFIG_HQ_HARDWARE_INFO
-#include <linux/hardware_info.h>
-static bool hq_hardinfo_initialized;
-static char fingerprint_name[30] = {0};
-#endif
-
 #define FPC_TTW_HOLD_TIME 2000
 #define FP_UNLOCK_REJECTION_TIMEOUT (FPC_TTW_HOLD_TIME - 500)
 
@@ -606,15 +600,6 @@ static ssize_t compatible_all_set(struct device *dev,
 			goto exit;
 		usleep_range(PWR_ON_SLEEP_MIN_US, PWR_ON_SLEEP_MAX_US);
 
-#ifdef CONFIG_HQ_HARDWARE_INFO
-		if (!hq_hardinfo_initialized) {
-			if (1 == gpio_get_value(fpc1020->irq_gpio)) {
-				snprintf(fingerprint_name, sizeof(fingerprint_name), "fpc1260");
-				get_hardware_info_data(HWID_FINGERPRINT, fingerprint_name);
-				hq_hardinfo_initialized = true;
-			}
-		}
-#endif
 	}else if (!strncmp(buf, "disable", strlen("disable")) && fpc1020->compatible_enabled != 0){
 		if (gpio_is_valid(fpc1020->irq_gpio))
 		{
@@ -851,12 +836,6 @@ static int __init fpc1020_init(void)
 static void __exit fpc1020_exit(void)
 {
 	pr_info("%s\n", __func__);
-#ifdef CONFIG_HQ_HARDWARE_INFO
-	if (hq_hardinfo_initialized) {
-		hq_hardinfo_initialized = false;
-		memset(fingerprint_name, 0x0, sizeof(fingerprint_name));
-	}
-#endif
 	platform_driver_unregister(&fpc1020_driver);
 }
 
