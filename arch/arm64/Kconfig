@@ -1247,3 +1247,7 @@ source "arch/arm64/crypto/Kconfig"
 endif
 
 source "lib/Kconfig"
+
+config XIAOMI_CLOVER
+	bool "Xiaomi Mi Pad 4/4 Plus"
+	default y
