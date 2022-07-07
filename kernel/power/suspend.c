@@ -34,6 +34,12 @@
 
 #include "power.h"
 
+#ifdef CONFIG_XIAOMI_CLOVER
+#include <linux/gpio.h>
+extern int slst_gpio_base_id;
+#define PROC_AWAKE_ID 12 /* 12th bit */
+#endif
+
 const char *pm_labels[] = { "mem", "standby", "freeze", NULL };
 const char *pm_states[PM_SUSPEND_MAX];
 
@@ -564,7 +570,13 @@ int pm_suspend(suspend_state_t state)
 		return -EINVAL;
 
 	pm_suspend_marker("entry");
+#ifdef CONFIG_XIAOMI_CLOVER
+	gpio_set_value(slst_gpio_base_id + PROC_AWAKE_ID, 0);
+#endif
 	error = enter_state(state);
+#ifdef CONFIG_XIAOMI_CLOVER
+	gpio_set_value(slst_gpio_base_id + PROC_AWAKE_ID, 1);
+#endif
 	if (error) {
 		suspend_stats.fail++;
 		dpm_save_failed_errno(error);
