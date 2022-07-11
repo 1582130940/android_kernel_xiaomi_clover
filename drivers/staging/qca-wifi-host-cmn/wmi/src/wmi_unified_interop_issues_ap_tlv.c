@@ -38,18 +38,24 @@ extract_interop_issues_ap_ev_param_tlv(wmi_unified_t wmi_handle, void *evt_buf,
 		(WMI_PDEV_RAP_INFO_EVENTID_param_tlvs *)evt_buf;
 
 	if (!param_buf) {
+#ifdef WLAN_DEBUG
 		wmi_err_rl("Invalid param_buf");
+#endif
 		return -EINVAL;
 	}
 
 	fixed_param = param_buf->fixed_param;
 	if (!fixed_param) {
+#ifdef WLAN_DEBUG
 		wmi_err_rl("Invalid fixed_praram");
+#endif
 		return -EINVAL;
 	}
 
 	if (fixed_param->type != WMI_ROGUE_AP_ON_STA_PS) {
+#ifdef WLAN_DEBUG
 		wmi_err_rl("Invalid type");
+#endif
 		return -EINVAL;
 	}
 

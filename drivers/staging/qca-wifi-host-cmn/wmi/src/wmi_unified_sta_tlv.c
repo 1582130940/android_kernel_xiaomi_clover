@@ -837,9 +837,11 @@ send_update_tdls_peer_state_cmd_tlv(wmi_unified_t wmi_handle,
 
 		if (in_chan_info->dfs_set) {
 			WMI_SET_CHANNEL_FLAG(chan_info, WMI_CHAN_FLAG_PASSIVE);
+#ifdef WLAN_DEBUG
 			wmi_debug("chan[%d] DFS[%d]",
 				 in_chan_info->chan_id,
 				 in_chan_info->dfs_set);
+#endif
 		}
 
 		if (chan_info->mhz < WMI_2_4_GHZ_MAX_FREQ)
@@ -1478,18 +1480,24 @@ static QDF_STATUS extract_sar2_result_event_tlv(void *handle,
 		(WMI_SAR2_RESULT_EVENTID_param_tlvs *)event;
 
 	if (!param_buf) {
+#ifdef WLAN_DEBUG
 		wmi_err("Invalid sar2 result event buffer");
+#endif
 		return QDF_STATUS_E_INVAL;
 	}
 
 	sar2_fixed_param = param_buf->fixed_param;
 	if (!sar2_fixed_param) {
+#ifdef WLAN_DEBUG
 		wmi_err("Invalid sar2 result event fixed param buffer");
+#endif
 		return QDF_STATUS_E_INVAL;
 	}
 
+#ifdef WLAN_DEBUG
 	wmi_debug("SAR2 result: %s",
 		 wmi_sar2_result_string(sar2_fixed_param->result));
+#endif
 
 	return QDF_STATUS_SUCCESS;
 }
@@ -2454,7 +2462,9 @@ static QDF_STATUS send_get_arp_stats_req_cmd_tlv(wmi_unified_t wmi_handle,
 	/* fill in arp stats req cmd values */
 	get_arp_stats->vdev_id = req_buf->vdev_id;
 
+#ifdef WLAN_DEBUG
 	wmi_debug("vdev=%d", req_buf->vdev_id);
+#endif
 	/* Send per roam config parameters */
 	wmi_mtrace(WMI_VDEV_GET_ARP_STAT_CMDID, NO_SESSION, 0);
 	status = wmi_unified_cmd_send(wmi_handle, buf,
