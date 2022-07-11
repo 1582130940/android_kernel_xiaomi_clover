@@ -2606,7 +2606,9 @@ bool wmi_service_enabled(void *wmi_hdl, uint32_t service_id)
 				wmi_handle->services[service_id]);
 		}
 	} else {
+#ifdef WLAN_DEBUG
 		wmi_info("Service %d not supported", service_id);
+#endif
 	}
 
 	return false;

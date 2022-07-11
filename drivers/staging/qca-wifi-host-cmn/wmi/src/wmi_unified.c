@@ -1570,7 +1570,9 @@ wmi_buf_t wmi_buf_alloc_fl(wmi_unified_t wmi_handle, uint32_t len,
 				false, func, line);
 
 	if (!wmi_buf) {
+#ifdef WLAN_DEBUG
 		wmi_nofl_err("%s:%d, failed to alloc len:%d", func, line, len);
+#endif
 		return NULL;
 	}
 
@@ -1649,6 +1651,7 @@ static bool wmi_is_pm_resume_cmd(uint32_t cmd_id)
 
 static inline void wmi_unified_debug_dump(wmi_unified_t wmi_handle)
 {
+#ifdef WLAN_DEBUG
 	wmi_nofl_err("Endpoint ID = %d, Tx Queue Depth = %d, soc_id = %u, target type = %s",
 		     wmi_handle->wmi_endpoint_id,
 		     htc_get_tx_queue_depth(wmi_handle->htc_handle,
@@ -1657,6 +1660,7 @@ static inline void wmi_unified_debug_dump(wmi_unified_t wmi_handle)
 		     (wmi_handle->target_type ==
 		      WMI_TLV_TARGET ? "WMI_TLV_TARGET" :
 						"WMI_NON_TLV_TARGET"));
+#endif
 }
 
 #ifdef WLAN_FEATURE_WMI_SEND_RECV_QMI
@@ -1739,13 +1743,17 @@ QDF_STATUS wmi_unified_cmd_send_fl(wmi_unified_t wmi_handle, wmi_buf_t buf,
 							      cmd_id);
 	} else if (qdf_atomic_read(&wmi_handle->is_target_suspended) &&
 		   !wmi_is_pm_resume_cmd(cmd_id)) {
+#ifdef WLAN_DEBUG
 			wmi_nofl_err("Target is suspended (via %s:%u)",
 					func, line);
+#endif
 		return QDF_STATUS_E_BUSY;
 	}
 
 	if (wmi_handle->wmi_stopinprogress) {
+#ifdef WLAN_DEBUG
 		wmi_nofl_err("%s:%d, WMI stop in progress", func, line);
+#endif
 		return QDF_STATUS_E_INVAL;
 	}
 
@@ -1756,16 +1764,20 @@ QDF_STATUS wmi_unified_cmd_send_fl(wmi_unified_t wmi_handle, wmi_buf_t buf,
 
 		if (wmi_handle->ops->wmi_check_command_params(NULL, buf_ptr, len, cmd_id)
 			!= 0) {
+#ifdef WLAN_DEBUG
 			wmi_nofl_err("%s:%d, Invalid WMI Param Buffer for Cmd:%d",
 				     func, line, cmd_id);
+#endif
 			return QDF_STATUS_E_INVAL;
 		}
 	}
 #endif
 
 	if (qdf_nbuf_push_head(buf, sizeof(WMI_CMD_HDR)) == NULL) {
+#ifdef WLAN_DEBUG
 		wmi_nofl_err("%s:%d, Failed to send cmd %x, no memory",
 			     func, line, cmd_id);
+#endif
 		return QDF_STATUS_E_NOMEM;
 	}
 
@@ -1775,12 +1787,16 @@ QDF_STATUS wmi_unified_cmd_send_fl(wmi_unified_t wmi_handle, wmi_buf_t buf,
 	qdf_atomic_inc(&wmi_handle->pending_cmds);
 	if (qdf_atomic_read(&wmi_handle->pending_cmds) >=
 			wmi_handle->wmi_max_cmds) {
+#ifdef WLAN_DEBUG
 		wmi_nofl_err("hostcredits = %d",
 			     wmi_get_host_credits(wmi_handle));
+#endif
 		htc_dump_counter_info(wmi_handle->htc_handle);
 		qdf_atomic_dec(&wmi_handle->pending_cmds);
+#ifdef WLAN_DEBUG
 		wmi_nofl_err("%s:%d, MAX %d WMI Pending cmds reached",
 			     func, line, wmi_handle->wmi_max_cmds);
+#endif
 		wmi_unified_debug_dump(wmi_handle);
 		qdf_trigger_self_recovery(QDF_WMI_EXCEED_MAX_PENDING_CMDS);
 		return QDF_STATUS_E_BUSY;
@@ -1823,8 +1839,10 @@ QDF_STATUS wmi_unified_cmd_send_fl(wmi_unified_t wmi_handle, wmi_buf_t buf,
 
 	if (QDF_STATUS_SUCCESS != status) {
 		qdf_atomic_dec(&wmi_handle->pending_cmds);
+#ifdef WLAN_DEBUG
 		wmi_nofl_err("%s:%d, htc_send_pkt failed, status:%d",
 			     func, line, status);
+#endif
 		qdf_mem_free(pkt);
 		return status;
 	}
@@ -1948,7 +1966,9 @@ int wmi_unified_register_event_handler(wmi_unified_t wmi_handle,
 	evt_id = wmi_handle->wmi_events[event_id];
 
 	if (wmi_unified_get_event_handler_ix(wmi_handle, evt_id) != -1) {
+#ifdef WLAN_DEBUG
 		wmi_info("event handler already registered 0x%x", evt_id);
+#endif
 		return QDF_STATUS_E_FAILURE;
 	}
 	if (soc->max_event_idx == WMI_UNIFIED_MAX_EVENT) {
@@ -1995,8 +2015,10 @@ int wmi_unified_unregister_event(wmi_unified_t wmi_handle,
 
 	idx = wmi_unified_get_event_handler_ix(wmi_handle, evt_id);
 	if (idx == -1) {
+#ifdef WLAN_DEBUG
 		wmi_warn("event handler is not registered: evt id 0x%x",
 			 evt_id);
+#endif
 		return QDF_STATUS_E_FAILURE;
 	}
 	wmi_handle->event_handler[idx] = NULL;
@@ -2033,15 +2055,19 @@ int wmi_unified_unregister_event_handler(wmi_unified_t wmi_handle,
 
 	if (event_id >= wmi_events_max ||
 		wmi_handle->wmi_events[event_id] == WMI_EVENT_ID_INVALID) {
+#ifdef WLAN_DEBUG
 		wmi_err("Event id %d is unavailable", event_id);
+#endif
 		return QDF_STATUS_E_FAILURE;
 	}
 	evt_id = wmi_handle->wmi_events[event_id];
 
 	idx = wmi_unified_get_event_handler_ix(wmi_handle, evt_id);
 	if (idx == -1) {
+#ifdef WLAN_DEBUG
 		wmi_err("event handler is not registered: evt id 0x%x",
 			 evt_id);
+#endif
 		return QDF_STATUS_E_FAILURE;
 	}
 	wmi_handle->event_handler[idx] = NULL;
@@ -2173,7 +2199,9 @@ static void wmi_control_rx(void *ctx, HTC_PACKET *htc_packet)
 	id = WMI_GET_FIELD(qdf_nbuf_data(evt_buf), WMI_CMD_HDR, COMMANDID);
 	idx = wmi_unified_get_event_handler_ix(wmi_handle, id);
 	if (qdf_unlikely(idx == A_ERROR)) {
+#ifdef WLAN_DEBUG
 		wmi_debug("no handler registered for event id 0x%x", id);
+#endif
 		qdf_nbuf_free(evt_buf);
 		return;
 	}
