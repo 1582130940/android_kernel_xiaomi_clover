@@ -1924,9 +1924,11 @@ QDF_STATUS wma_remove_peer(tp_wma_handle wma, uint8_t *bssid,
 	}
 
 	/* peer->ref_cnt is not visible in WMA */
+#ifdef WLAN_DEBUG
 	wlan_roam_debug_log(vdev_id, DEBUG_PEER_DELETE_SEND,
 			    DEBUG_INVALID_PEER_ID, peer_addr, peer,
 			    0, 0);
+#endif
 	qdf_status = wmi_unified_peer_delete_send(wma->wmi_handle, peer_addr,
 						  vdev_id);
 	if (QDF_IS_STATUS_ERROR(qdf_status)) {
@@ -2212,8 +2214,10 @@ QDF_STATUS wma_create_peer(tp_wma_handle wma, struct cdp_pdev *pdev,
 		  __func__, peer, peer_addr, vdev_id,
 		  wma->interfaces[vdev_id].peer_count);
 
+#ifdef WLAN_DEBUG
 	wlan_roam_debug_log(vdev_id, DEBUG_PEER_CREATE_SEND,
 			    DEBUG_INVALID_PEER_ID, peer_addr, peer, 0, 0);
+#endif
 	cdp_peer_setup(dp_soc, vdev, peer);
 
 	mac_addr_raw = cdp_get_vdev_mac_addr(dp_soc, vdev);
@@ -3726,8 +3730,10 @@ int wma_peer_delete_handler(void *handle, uint8_t *cmd_param_info,
 	WMI_MAC_ADDR_TO_CHAR_ARRAY(&event->peer_macaddr, macaddr);
 	WMA_LOGD(FL("Peer Delete Response, vdev %d Peer %pM"),
 			event->vdev_id, macaddr);
+#ifdef WLAN_DEBUG
 	wlan_roam_debug_log(event->vdev_id, DEBUG_PEER_DELETE_RESP,
 			    DEBUG_INVALID_PEER_ID, macaddr, NULL, 0, 0);
+#endif
 	req_msg = wma_find_remove_req_msgtype(wma, event->vdev_id,
 					WMA_DELETE_STA_REQ);
 	if (!req_msg) {

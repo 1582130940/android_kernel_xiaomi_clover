@@ -1997,9 +1997,11 @@ static int wow_get_wmi_eventid(int32_t reason, uint32_t tag)
 		event_id = 0;
 		break;
 	}
+#ifdef WLAN_DEBUG
 	wlan_roam_debug_log(WMA_INVALID_VDEV_ID, DEBUG_WOW_REASON,
 			    DEBUG_INVALID_PEER_ID, NULL, NULL,
 			    reason, event_id);
+#endif
 
 	return event_id;
 }
@@ -2892,11 +2894,13 @@ static int wma_wake_event_piggybacked(
 	 */
 	case WOW_REASON_LOW_RSSI:
 	case WOW_REASON_ROAM_HO:
+#ifdef WLAN_DEBUG
 		wlan_roam_debug_log(event_param->fixed_param->vdev_id,
 				    DEBUG_WOW_ROAM_EVENT,
 				    DEBUG_INVALID_PEER_ID,
 				    NULL, NULL, wake_reason,
 				    pb_event_len);
+#endif
 		if (pb_event_len > 0) {
 			errno = wma_roam_event_callback(wma, pb_event,
 							pb_event_len);
