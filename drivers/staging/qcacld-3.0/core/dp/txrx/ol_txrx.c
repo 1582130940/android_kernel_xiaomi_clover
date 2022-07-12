@@ -2181,7 +2181,9 @@ ol_txrx_peer_attach(struct cdp_vdev *pvdev, uint8_t *peer_mac_addr,
 				    vdev->wait_on_peer_id, (int) rc);
 			/* Added for debugging only */
 			ol_txrx_dump_peer_access_list(temp_peer);
+#ifdef WLAN_DEBUG
 			wlan_roam_debug_dump_table();
+#endif
 			vdev->wait_on_peer_id = OL_TXRX_INVALID_LOCAL_PEER_ID;
 
 			return NULL;
@@ -2941,11 +2943,13 @@ int ol_txrx_peer_release_ref(ol_txrx_peer_handle peer,
 	if (debug_id == PEER_DEBUG_ID_OL_RX_THREAD)
 		ref_silent = true;
 
+#ifdef WLAN_DEBUG
 	if (!ref_silent)
 		wlan_roam_debug_log(vdev->vdev_id, DEBUG_PEER_UNREF_DELETE,
 				    DEBUG_INVALID_PEER_ID, &peer->mac_addr.raw,
 				    peer, 0xdead,
 				    qdf_atomic_read(&peer->ref_cnt));
+#endif
 
 
 	/*
@@ -2994,11 +2998,13 @@ int ol_txrx_peer_release_ref(ol_txrx_peer_handle peer,
 
 	if (qdf_atomic_dec_and_test(&peer->ref_cnt)) {
 		u16 peer_id;
+#ifdef WLAN_DEBUG
 		wlan_roam_debug_log(vdev->vdev_id,
 				    DEBUG_DELETING_PEER_OBJ,
 				    DEBUG_INVALID_PEER_ID,
 				    &peer->mac_addr.raw, peer, 0,
 				    qdf_atomic_read(&peer->ref_cnt));
+#endif
 		peer_id = peer->local_id;
 
 		/* Drop all pending frames in the rx thread queue */
@@ -3108,9 +3114,11 @@ int ol_txrx_peer_release_ref(ol_txrx_peer_handle peer,
 	}
 	return rc;
 ERR_STATE:
+#ifdef WLAN_DEBUG
 	wlan_roam_debug_log(vdev->vdev_id, DEBUG_PEER_UNREF_DELETE,
 			    DEBUG_INVALID_PEER_ID, &peer->mac_addr.raw,
 			    peer, err_code, qdf_atomic_read(&peer->ref_cnt));
+#endif
 	return -EINVAL;
 }
 
